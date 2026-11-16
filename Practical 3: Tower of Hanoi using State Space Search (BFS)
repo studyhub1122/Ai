@@ -1,0 +1,40 @@
+# Practical 3: Tower of Hanoi using State Space Search (BFS)
+from collections import deque
+
+N = 3
+start = (tuple(range(N, 0, -1)), (), ())   # pegs A, B, C ; last element = top disk
+goal = ((), (), tuple(range(N, 0, -1)))
+names = "ABC"
+
+def moves(state):
+    for i in range(3):
+        if not state[i]:
+            continue
+        disk = state[i][-1]
+        for j in range(3):
+            if i != j and (not state[j] or state[j][-1] > disk):
+                new = [list(p) for p in state]
+                new[i].pop()
+                new[j].append(disk)
+                yield tuple(tuple(p) for p in new), f"Move disk {disk} from {names[i]} to {names[j]}"
+
+def solve():
+    q = deque([start])
+    parent = {start: (None, None)}
+    while q:
+        s = q.popleft()
+        if s == goal:
+            path = []
+            while parent[s][0] is not None:
+                path.append((parent[s][1], s))
+                s = parent[s][0]
+            return path[::-1], len(parent)
+        for n, m in moves(s):
+            if n not in parent:
+                parent[n] = (s, m)
+                q.append(n)
+
+path, explored = solve()
+print(f"Disks = {N}, minimum moves = {len(path)} (2^{N}-1 = {2**N - 1}), states generated = {explored}\n")
+for k, (m, s) in enumerate(path, 1):
+    print(f"{k}. {m:<28} -> A:{list(s[0])} B:{list(s[1])} C:{list(s[2])}")
