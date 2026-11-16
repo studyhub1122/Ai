@@ -1,0 +1,57 @@
+# Practical 4: Sudoku Solver - Constraint Propagation + Backtracking
+puzzle = ("530070000600195000098000060800060003400803001700020006060000280000419005000080079")
+grid = [int(ch) for ch in puzzle]          # 0 = empty
+
+def candidates(g, i):
+    r, c = divmod(i, 9)
+    used = set(g[r * 9:r * 9 + 9])                          # row
+    used |= {g[k * 9 + c] for k in range(9)}                # column
+    br, bc = 3 * (r // 3), 3 * (c // 3)
+    used |= {g[(br + x) * 9 + bc + y] for x in range(3) for y in range(3)}   # 3x3 box
+    return [v for v in range(1, 10) if v not in used]
+
+def propagate(g):
+    """Fill cells which have only ONE possible value, repeat until nothing changes."""
+    changed = True
+    while changed:
+        changed = False
+        for i in range(81):
+            if g[i] == 0:
+                cand = candidates(g, i)
+                if not cand:
+                    return False                 # dead end
+                if len(cand) == 1:
+                    g[i] = cand[0]
+                    changed = True
+    return True
+
+def solve(g):
+    g = g[:]
+    if not propagate(g):
+        return None
+    empties = [i for i in range(81) if g[i] == 0]
+    if not empties:
+        return g
+    i = min(empties, key=lambda k: len(candidates(g, k)))   # fewest options first (MRV)
+    for v in candidates(g, i):
+        g2 = g[:]
+        g2[i] = v                                           # guess
+        res = solve(g2)                                     # recursion
+        if res:
+            return res
+    return None                                             # backtrack
+
+def show(g):
+    for r in range(9):
+        if r % 3 == 0 and r:
+            print("------+-------+------")
+        row = ""
+        for c in range(9):
+            if c % 3 == 0 and c:
+                row += "| "
+            row += (str(g[r * 9 + c]) if g[r * 9 + c] else ".") + " "
+        print(row)
+
+print("Puzzle:"); show(grid)
+sol = solve(grid)
+print("\nSolution:"); show(sol)
