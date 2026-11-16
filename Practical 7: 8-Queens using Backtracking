@@ -1,0 +1,27 @@
+# Practical 7: 8-Queens using Backtracking
+N = 8
+solutions = []
+
+def is_safe(cols, row, col):
+    for r in range(row):
+        c = cols[r]
+        if c == col or abs(c - col) == abs(r - row):   # same column or diagonal
+            return False
+    return True
+
+def place(cols, row):
+    if row == N:
+        solutions.append(cols[:])
+        return
+    for col in range(N):
+        if is_safe(cols, row, col):
+            cols.append(col)        # place queen
+            place(cols, row + 1)    # go to next row
+            cols.pop()              # BACKTRACK
+
+place([], 0)
+print("Total solutions for 8-Queens:", len(solutions))
+first = solutions[0]
+print("First solution (column of queen in each row):", first, "\n")
+for r in range(N):
+    print(" ".join("Q" if first[r] == c else "." for c in range(N)))
