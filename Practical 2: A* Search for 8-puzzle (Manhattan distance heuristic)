@@ -1,0 +1,59 @@
+# Practical 2: A* Search for 8-puzzle (Manhattan distance heuristic)
+import heapq
+
+GOAL = (1, 2, 3, 4, 5, 6, 7, 8, 0)      # 0 = blank
+
+def h(state):
+    total = 0
+    for i, tile in enumerate(state):
+        if tile != 0:
+            gi = GOAL.index(tile)
+            total += abs(i // 3 - gi // 3) + abs(i % 3 - gi % 3)
+    return total
+
+def neighbors(state):
+    i = state.index(0)
+    r, c = divmod(i, 3)
+    for dr, dc, name in [(-1, 0, "Up"), (1, 0, "Down"), (0, -1, "Left"), (0, 1, "Right")]:
+        nr, nc = r + dr, c + dc
+        if 0 <= nr < 3 and 0 <= nc < 3:
+            j = nr * 3 + nc
+            s = list(state)
+            s[i], s[j] = s[j], s[i]
+            yield tuple(s), name
+
+def astar(start):
+    pq = [(h(start), 0, start)]          # (f, g, state)
+    g = {start: 0}
+    parent = {start: (None, None)}
+    expanded = 0
+    while pq:
+        f, cost, s = heapq.heappop(pq)
+        if cost > g[s]:
+            continue
+        if s == GOAL:
+            path = []
+            while parent[s][0] is not None:
+                path.append((parent[s][1], s))
+                s = parent[s][0]
+            return path[::-1], expanded
+        expanded += 1
+        for n, move in neighbors(s):
+            ng = cost + 1
+            if n not in g or ng < g[n]:
+                g[n] = ng
+                parent[n] = (s, move)
+                heapq.heappush(pq, (ng + h(n), ng, n))
+    return None, expanded
+
+def show(s):
+    for r in range(3):
+        print(" ".join(str(x) if x else "_" for x in s[r * 3:r * 3 + 3]))
+
+start = (1, 2, 3, 5, 0, 6, 4, 7, 8)
+print("Start state:"); show(start)
+path, expanded = astar(start)
+print("\nSolved in", len(path), "moves, nodes expanded:", expanded)
+for k, (move, state) in enumerate(path, 1):
+    print(f"\nStep {k}: {move}")
+    show(state)
