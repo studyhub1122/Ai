@@ -1,0 +1,34 @@
+# Practical 8: Simple Chatbot using predefined rules and pattern matching
+import re
+
+rules = [
+    (r"\b(hi|hello|hey|namaste)\b",            ["Namaste! Mi AI Bot aahe. Tumhala kasa madat karu?"]),
+    (r"my name is (\w+)",                      ["Nice to meet you, {0}! Kasa kay?"]),
+    (r"how are you",                           ["Mi mast aahe! Tumhi kase aahat?"]),
+    (r"\b(admission|apply)\b",                 ["Admission cha process college chya website var aahe."]),
+    (r"\b(exam|timetable)\b",                  ["Exam timetable notice board la lagto. Best of luck!"]),
+    (r"what is (ai|artificial intelligence)",  ["AI mhanje machines la manasasarkhe vichar karayla shikvane."]),
+    (r"\b(thanks|thank you)\b",                ["Welcome! Kahi ajun vichayche asel tar sanga."]),
+    (r"\b(bye|exit|quit)\b",                   ["Bye! Bhetu punha. Take care!"]),
+]
+
+def chatbot_reply(text):
+    text = text.lower().strip()
+    for pattern, responses in rules:
+        m = re.search(pattern, text)
+        if m:
+            return responses[0].format(*[g.capitalize() for g in m.groups()])
+    return "Sorry, mala samajle nahi. Tumhi punha vegle shabdat sanga."
+
+demo = ["Hello", "My name is Om", "How are you?", "What is AI?",
+        "Tell me about admission", "blah blah", "Thank you", "bye"]
+
+for msg in demo:
+    print("You:", msg)
+    print("Bot:", chatbot_reply(msg))
+    print()
+
+# For live chat, use:
+# while True:
+#     msg = input("You: "); print("Bot:", chatbot_reply(msg))
+#     if re.search(r"\b(bye|exit|quit)\b", msg.lower()): break
