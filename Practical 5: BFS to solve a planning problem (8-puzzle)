@@ -1,0 +1,39 @@
+# Practical 5: BFS to solve a planning problem (8-puzzle)
+from collections import deque
+
+GOAL = (1, 2, 3, 4, 5, 6, 7, 8, 0)
+
+def neighbors(state):
+    i = state.index(0)
+    r, c = divmod(i, 3)
+    for dr, dc, name in [(-1, 0, "Up"), (1, 0, "Down"), (0, -1, "Left"), (0, 1, "Right")]:
+        nr, nc = r + dr, c + dc
+        if 0 <= nr < 3 and 0 <= nc < 3:
+            j = nr * 3 + nc
+            s = list(state)
+            s[i], s[j] = s[j], s[i]
+            yield tuple(s), name
+
+def bfs(start):
+    q = deque([start])
+    parent = {start: (None, None)}
+    while q:
+        s = q.popleft()
+        if s == GOAL:
+            moves = []
+            while parent[s][0] is not None:
+                moves.append(parent[s][1])
+                s = parent[s][0]
+            return moves[::-1], len(parent)
+        for n, m in neighbors(s):
+            if n not in parent:
+                parent[n] = (s, m)
+                q.append(n)
+    return None, len(parent)
+
+start = (1, 2, 3, 0, 4, 6, 7, 5, 8)
+moves, visited = bfs(start)
+print("Start :", start)
+print("Goal  :", GOAL)
+print("Shortest plan (blank tile moves):", " -> ".join(moves))
+print("Number of moves:", len(moves), "| States visited:", visited)
