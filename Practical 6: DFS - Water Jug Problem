@@ -1,0 +1,30 @@
+# Practical 6: DFS - Water Jug Problem (4L jug X, 3L jug Y, target = 2L in X)
+CAP_X, CAP_Y, TARGET = 4, 3, 2
+
+def successors(x, y):
+    return [
+        ((CAP_X, y), "Fill X"),
+        ((x, CAP_Y), "Fill Y"),
+        ((0, y), "Empty X"),
+        ((x, 0), "Empty Y"),
+        ((x - min(x, CAP_Y - y), y + min(x, CAP_Y - y)), "Pour X -> Y"),
+        ((x + min(y, CAP_X - x), y - min(y, CAP_X - x)), "Pour Y -> X"),
+    ]
+
+def dfs(state, visited, path):
+    if state[0] == TARGET:
+        return path
+    visited.add(state)
+    for nxt, action in successors(*state):
+        if nxt not in visited:
+            res = dfs(nxt, visited, path + [(action, nxt)])
+            if res:
+                return res
+    return None
+
+path = dfs((0, 0), set(), [])
+print(f"Jugs: X={CAP_X}L, Y={CAP_Y}L | Goal: {TARGET}L in jug X")
+print("Start: (0, 0)")
+for k, (a, s) in enumerate(path, 1):
+    print(f"Step {k}: {a:<12} -> X={s[0]}, Y={s[1]}")
+print("Goal reached! Total steps:", len(path))
